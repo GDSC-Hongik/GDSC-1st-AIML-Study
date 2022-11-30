@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import math
 from google.colab.patches import cv2_imshow
-
+import random
 
 def show_crops(crop_lst : list, figsize=(50,50)) -> plt.figure :
     plt.figure(figsize=figsize)
@@ -32,6 +32,7 @@ def find_bbox(img_path : str,
     '''    
     imgray = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
     dst = cv2.imread(img_path)
+    dst = cv2.cvtColor(dst, cv2.COLOR_BAYER_BG2RGB)
 
     _, imthres = cv2.threshold(imgray, thresh_min, thresh_max, cv2.THRESH_BINARY_INV)
 
@@ -129,3 +130,100 @@ def show_tiles(tile_lst : list, figsize=(50,50)) -> plt.figure :
         plt.subplot(5, 10, idx+1)
         plt.imshow(tile)
     plt.show()
+
+
+def train_aug(crop_lst : list) -> list :
+    # TODO 
+    ## Augmentation 적절하게 다시 설정하기
+
+    def brightness(gray, val):
+        #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        brightness = int(random.uniform(-val, val))
+        if brightness > 0:
+            gray = gray + brightness
+        else:
+            gray = gray - brightness
+        gray = np.clip(gray, 10, 255)
+        return gray
+
+    def contrast(gray, min_val, max_val):
+        #gray = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+        alpha = int(random.uniform(min_val, max_val)) # Contrast control
+        adjusted = cv2.convertScaleAbs(gray, alpha=alpha)
+        return adjusted
+
+    def fill(img, h, w):
+        img = cv2.resize(img, (h, w), cv2.INTER_CUBIC)
+        return img
+
+    def rotation(img, angle):
+        angle = int(random.uniform(-angle, angle))
+        h, w = img.shape[:2]
+        M = cv2.getRotationMatrix2D((int(w/2), int(h/2)), angle, 1)
+        img = cv2.warpAffine(img, M, (w, h))
+        return img
+
+    def vertical_shift_down(img, ratio=0.0):
+        if ratio > 1 or ratio < 0:
+            print('Value should be less than 1 and greater than 0')
+            return img
+        ratio = random.uniform(-ratio, ratio)
+        h, w = img.shape[:2]
+        to_shift = h*ratio
+        if ratio > 0:
+            img = img[:int(h-to_shift), :, :]
+        img = fill(img, h, w)
+        return img
+
+    def vertical_shift_up(img, ratio=0.0):
+        if ratio > 1 or ratio < 0:
+            print('Value should be less than 1 and greater than 0')
+            return img
+        ratio = random.uniform(0.0, ratio)
+        h, w = img.shape[:2]
+        to_shift = h*ratio
+        if ratio > 0:
+            img = img[:int(h-to_shift), :, :]
+        img = fill(img, h, w)
+        return img
+
+    def horizontal_shift(img, ratio=0.0):
+        if ratio > 1 or ratio < 0:
+            print('Value should be less than 1 and greater than 0')
+            return img
+        ratio = random.uniform(-ratio, ratio)
+        h, w = img.shape[:2]
+        to_shift = w*ratio
+        if ratio > 0:
+            img = img[:, :int(w-to_shift), :]
+        if ratio < 0:
+            img = img[:, int(-1*to_shift):, :]
+        img = fill(img, h, w)
+        return img
+
+    def vertical_flip(img, flag):
+        if flag:
+            return cv2.flip(img, 0)
+        else:
+            return img
+
+    def horizontal_flip(img, flag):
+        if flag:
+            return cv2.flip(img, 1)
+        else:
+            return img
+
+    train_aug_lst = []
+    for crop in crop_lst :
+        # img = cv2.resize(crop, dsize=(299, 299),interpolation=cv2.INTER_LINEAR)
+        img = brightness(crop, 30)
+        img = contrast(img, 1, 1.5)
+        img = horizontal_flip(img, 1)
+        img = rotation(img, 180)
+        img = horizontal_shift(img, 0.1)
+        #if random.uniform(0,1) > 0.5:
+        #    img = vertical_flip(img, 1)
+        train_aug_lst.append(img)
+
+    return train_aug_lst
+
