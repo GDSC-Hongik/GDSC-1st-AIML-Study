@@ -1,5 +1,5 @@
 from torch.utils.data import Dataset, DataLoader
-from utils import find_bbox, crop_rect, show_crops, get_tiles, show_tiles, train_aug
+from utils import find_bbox, crop_rect, show_crops, get_tiles, show_tiles, train_aug, test_aug
 import pandas as pd
 import numpy as np
 
@@ -16,8 +16,6 @@ class GDSCDataset(Dataset) :
     5. bag은 tile들이 엄청 많이 담긴 하나의 가방이 됨
         5-1. tile들이 엄청 많이 담겼으니 이걸.. 다 쓰면 또 안 될 거 같은데... 고민좀 해봐야할듯
     6. 이 bag과 label 하나를 매칭시킬 예정
-
-
     '''
 
     def __init__(self, medical_df : pd.DataFrame, labels : np.array, train_mode=True):
@@ -30,8 +28,12 @@ class GDSCDataset(Dataset) :
         label = self.medical_df['N_category'].iloc[idx]
         cropped_imgs = find_bbox(img_path=img_path)
         
+        ## Augmentation
         if self.train_mode :
             cropped_imgs = train_aug(crop_lst=cropped_imgs)
+        
+        else :
+            cropped_imgs = test_aug(crop_lst=cropped_imgs)
 
         # 가방 하나는 여러 개의 tiles의 list로 이루어져 있습니다
         bag = [get_tiles(img=crop, tile_size=(150, 150), offset=(30, 30)) for crop in cropped_imgs]
@@ -40,5 +42,3 @@ class GDSCDataset(Dataset) :
 
     def __len__(self) :
         return len(self.medical_df)
-
-
