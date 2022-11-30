@@ -5,6 +5,18 @@ import numpy as np
 import math
 from google.colab.patches import cv2_imshow
 import random
+import albumentations as A
+from albumentations.pytorch.transforms import ToTensorV2
+
+# TODO
+'''
+1. Tiling된 것들 중에서 유의미한 영역과 적당한 갯수를 찾아내는 방법 생각해내기
+    -> 지금은 crop에서 tile들을 얻어내는데... 문제는 이러면 몇 가지 걱정거리? 가 발생함
+    -> a. 첫번째 단계인 crop은 threshold 기반의 bbox 탐지로 얻어냄 -> 이 bbox가 유의미한 곳에 안 쳐진다면? (mask가 쳐진 곳을 탐지해야 하는데 그러지 못하는 경우)
+    -> b. 클래스는 다행히 서로 비슷하긴 한데 그래도 뭐 어느 정도 tile끼리 밸런싱을 맞추면 좋겠음
+2. 적절한 Augmetation 논문 보면서 재설정하기
+'''
+
 
 def show_crops(crop_lst : list, figsize=(50,50)) -> plt.figure :
     plt.figure(figsize=figsize)
@@ -134,7 +146,7 @@ def show_tiles(tile_lst : list, figsize=(50,50)) -> plt.figure :
 
 def train_aug(crop_lst : list) -> list :
     # TODO 
-    ## Augmentation 적절하게 다시 설정하기
+    ## Augmentation 적절하게 다시 설정하기   Tiling을 위해 resized되거나 들쭉날쭉 해지는 건 없어야 함
 
     def brightness(gray, val):
         #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -213,6 +225,13 @@ def train_aug(crop_lst : list) -> list :
         else:
             return img
 
+    
+    totensor = A.Compose([
+                        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
+                                    max_pixel_value=255.0, always_apply=False, p=1.0),
+                        ToTensorV2()
+                        ])
+
     train_aug_lst = []
     for crop in crop_lst :
         # img = cv2.resize(crop, dsize=(299, 299),interpolation=cv2.INTER_LINEAR)
@@ -223,7 +242,26 @@ def train_aug(crop_lst : list) -> list :
         img = horizontal_shift(img, 0.1)
         #if random.uniform(0,1) > 0.5:
         #    img = vertical_flip(img, 1)
+        
+        img = totensor(image=img)['image']
+
         train_aug_lst.append(img)
 
     return train_aug_lst
+
+
+def test_aug(crop_lst : list) -> list :
+    
+    totensor = A.Compose([
+                        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
+                                    max_pixel_value=255.0, always_apply=False, p=1.0),
+                        ToTensorV2()
+                        ])
+
+    test_aug_lst = []
+    for crop in crop_lst :
+        img = totensor(image=crop)['image']
+
+        test_aug_lst.append(img)
+    return test_aug_lst
 
