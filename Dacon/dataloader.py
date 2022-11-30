@@ -14,30 +14,16 @@ def return_dataloaders() :
                                                         random_state=42
                                                     )
 
-    train_transforms = A.Compose([
-                                A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0),
-                                ToTensorV2()
-                                ])
-
-    test_transforms = A.Compose([                               
-                                A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0),
-                                ToTensorV2()
-                                ])
-
 
     train_dataset = GDSCDataset(medical_df=train_df, labels=train_labels.values, train_mode=True)
-    train_loader = DataLoader(train_dataset, batch_size=1, transform=train_transforms)
+    train_loader = DataLoader(train_dataset, batch_size=1)
 
     val_dataset = GDSCDataset(medical_df=val_df, labels=val_labels.values, train_mode=False)
-    val_loader = DataLoader(val_dataset, batch_size=1, transform=test_transforms)
+    val_loader = DataLoader(val_dataset, batch_size=1)
+
+
+    print(f'✅ # of Train Datas : {len(train_dataset)}')
+    print(f'✅ # of Validation Datas : {len(val_dataset)}')
+
 
     return train_loader, val_loader
-
-
-    # print(f'✅ # of Train Datas : {len(tr_dataset)}')
-    # print(f'✅ # of Validation Datas : {len(val_dataset)}')
-    # print(f'✅ # of Test Datas : {len(te_dataset)}')
-
-    # return train_loader, val_loader, te_loader
-
-
