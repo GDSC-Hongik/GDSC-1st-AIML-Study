@@ -27,7 +27,7 @@ def show_crops(crop_lst : list, figsize=(50,50)) -> plt.figure :
     plt.show()
 
 def find_bbox(img_path : str, 
-                thresh_min=200, thresh_max=255, bbox_w=150, bbox_h=150) -> list(np.array) :
+                thresh_min=200, thresh_max=255, bbox_w=150, bbox_h=150) -> list :
     '''
     한 개의 이미지에 대한 지정한 크기 만큼의 bbox를 찾아주는 함수입니다.
 
@@ -101,7 +101,7 @@ def crop_rect(img : np.array, rect : np.array) -> np.array :
     return img_crop, img_rot
 
 
-def get_tiles(img : np.array , tile_size : tuple, offset : tuple) -> list(np.array) :
+def get_tiles(img : np.array , tile_size : tuple, offset : tuple) -> list :
     '''
     들어온 이미지에 대하여 tiling을 수행하는 함수입니다.
     위의 find_bbox 함수 이후에 수행합니다.
