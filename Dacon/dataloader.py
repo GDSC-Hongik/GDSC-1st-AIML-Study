@@ -9,10 +9,10 @@ import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
 def return_dataloaders(df : pd.DataFrame) -> torch.utils.data.DataLoader :
-    
+
     train_df, val_df, train_labels, val_labels = train_test_split(
-                                                        train_df.drop(columns=['N_category']), 
-                                                        train_df['N_category'], 
+                                                        df.drop(columns=['N_category']), 
+                                                        df['N_category'], 
                                                         test_size=0.2, 
                                                         random_state=42
                                                     )
