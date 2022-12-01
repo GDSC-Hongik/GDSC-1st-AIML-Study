@@ -2,11 +2,14 @@ from torch.utils.data import DataLoader
 from dataset import GDSCDataset
 from sklearn.model_selection import train_test_split
 import cv2
+import pandas as pd
+import torch
 
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
-def return_dataloaders() :
+def return_dataloaders(df : pd.DataFrame) -> torch.utils.data.DataLoader :
+    
     train_df, val_df, train_labels, val_labels = train_test_split(
                                                         train_df.drop(columns=['N_category']), 
                                                         train_df['N_category'], 
