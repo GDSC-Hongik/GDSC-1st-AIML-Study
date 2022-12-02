@@ -44,7 +44,7 @@ def find_bbox(img_path : str,
     '''    
     imgray = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
     dst = cv2.imread(img_path)
-    dst = cv2.cvtColor(dst, cv2.COLOR_BAYER_BG2RGB)
+    dst = cv2.cvtColor(dst, cv2.COLOR_BGR2RGB)
 
     _, imthres = cv2.threshold(imgray, thresh_min, thresh_max, cv2.THRESH_BINARY_INV)
 
@@ -243,7 +243,7 @@ def train_aug(crop_lst : list) -> list :
         #if random.uniform(0,1) > 0.5:
         #    img = vertical_flip(img, 1)
         
-        img = totensor(image=img)['image']
+        # img = totensor(image=img)['image']
 
         train_aug_lst.append(img)
 
