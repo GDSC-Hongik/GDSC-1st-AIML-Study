@@ -25,7 +25,7 @@ class GDSCDataset(Dataset) :
 
     def __getitem__(self, idx) :
         img_path = self.medical_df['img_path'].iloc[idx]
-        label = self.medical_df['N_category'].iloc[idx]
+        label = self.labels[idx]
         cropped_imgs = find_bbox(img_path=img_path)
         
         ## Augmentation
