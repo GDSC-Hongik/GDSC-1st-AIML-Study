@@ -93,7 +93,7 @@ def crop_rect(img : np.array, rect : np.array) -> np.array :
 
     height, width = img.shape[0], img.shape[1]
     
-    M = cv2.getRotationsMatrix2D(center, angle, 1)
+    M = cv2.getRotationMatrix2D(center, angle, 1)
     img_rot = cv2.warpAffine(img, M, (width, height))
 
     img_crop = cv2.getRectSubPix(img_rot, size, center)
