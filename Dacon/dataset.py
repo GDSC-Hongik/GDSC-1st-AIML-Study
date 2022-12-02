@@ -2,6 +2,8 @@ from torch.utils.data import Dataset, DataLoader
 from utils import find_bbox, crop_rect, show_crops, get_tiles, show_tiles, train_aug, test_aug
 import pandas as pd
 import numpy as np
+import albumentations as A
+from albumentations.pytorch.transforms import ToTensorV2
 
 class GDSCDataset(Dataset) :
     '''
@@ -22,6 +24,12 @@ class GDSCDataset(Dataset) :
         self.medical_df = medical_df
         self.labels = labels
         self.train_mode = train_mode
+        self.totensor = A.Compose([
+                        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
+                                    max_pixel_value=255.0, always_apply=False, p=1.0),
+                        ToTensorV2()
+                        ])
+
 
     def __getitem__(self, idx) :
         img_path = self.medical_df['img_path'].iloc[idx]
@@ -32,11 +40,17 @@ class GDSCDataset(Dataset) :
         if self.train_mode :
             cropped_imgs = train_aug(crop_lst=cropped_imgs)
         
-        else :
-            cropped_imgs = test_aug(crop_lst=cropped_imgs)
+        # else :
+        #     cropped_imgs = test_aug(crop_lst=cropped_imgs)
 
         # 가방 하나는 여러 개의 tiles의 list로 이루어져 있습니다
-        bag = [get_tiles(img=crop, tile_size=(150, 150), offset=(30, 30)) for crop in cropped_imgs]
+        bag = []
+        for crop in cropped_imgs :
+            for tile in get_tiles(img=crop, tile_size=(150, 150), offset=(30, 30)) :
+                bag.append(self.totensor(image=tile)['image'])
+        
+        print('✅ # of Tiles.. : ', len(bag))
+        
 
         return bag, label
 
