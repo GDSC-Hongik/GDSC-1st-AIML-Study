@@ -1,5 +1,5 @@
 from torch.utils.data import Dataset, DataLoader
-from utils import find_bbox, crop_rect, show_crops, get_tiles, show_tiles, train_aug, test_aug
+from utils import find_bbox, crop_rect, show_crops, get_tiles, show_tiles, train_aug, test_aug, concat_crops
 import pandas as pd
 import numpy as np
 import albumentations as A
@@ -53,6 +53,49 @@ class GDSCDataset(Dataset) :
         
 
         return bag, label
+
+    def __len__(self) :
+        return len(self.medical_df)
+
+
+class GDSCDatasetV2(Dataset) :
+    def __init__(self, medical_df : pd.DataFrame, labels : np.array, train_mode=True):
+        self.medical_df = medical_df
+        self.labels = labels
+        self.train_mode = train_mode
+        self.train_augs = A.Compose([
+                        A.HorizontalFlip(),
+                        A.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
+                        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
+                                    max_pixel_value=255.0, always_apply=False, p=1.0),
+                        ToTensorV2()
+                        ])
+        self.test_augs = A.Compose([
+                        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
+                                    max_pixel_value=255.0, always_apply=False, p=1.0),
+                        ToTensorV2()
+                        ])
+        
+
+    def __getitem__(self, idx) :
+        img_path = self.medical_df['img_path'].iloc[idx]
+        label = self.labels[idx]
+        cropped_imgs = find_bbox(img_path=img_path)
+
+        tile_lst = []
+        for crop in cropped_imgs :
+                    for tile in get_tiles(img=crop, tile_size=(150, 150), offset=(30, 30)) :
+                        tile_lst.append(tile)
+
+        fin_img = concat_crops(tile_lst)
+
+        if self.train_mode :
+            fin_img = self.train_augs(image=fin_img)['image']
+
+        else :
+            fin_img = self.test_augs(image=fin_img)['image']
+
+        return fin_img, label
 
     def __len__(self) :
         return len(self.medical_df)
