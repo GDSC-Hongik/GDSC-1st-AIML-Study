@@ -48,7 +48,7 @@ def find_bbox(img_path : str,
 
     _, imthres = cv2.threshold(imgray, thresh_min, thresh_max, cv2.THRESH_BINARY_INV)
 
-    contours, hier = cv2.findContours(imthres, cv2.RETR_EXTERNAL, cv2.CHAIN_APPOX_SIMPLE)
+    contours, hier = cv2.findContours(imthres, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     try : hierarchy = hier[0]
     except : hierarchy = []
