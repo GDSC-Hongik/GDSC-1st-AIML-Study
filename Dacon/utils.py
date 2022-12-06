@@ -265,3 +265,18 @@ def test_aug(crop_lst : list) -> list :
         test_aug_lst.append(img)
     return test_aug_lst
 
+
+def concat_crops(crop_lst : list, resize=(299, 299)) -> np.array :
+    """Crop 된 Image들을 받아 Concat하여 하나의 image로 만들어버립니다.
+    Weakly Supervised다 보니, 일단... 하나의 이미지를 가지고 학습하는 방법으로 시도해봤습니다.
+    """
+    rows = len(crop_lst) // 2
+
+    crop_lst_2d = np.reshape(crop_lst, (-1, rows))
+
+    concat_img = cv2.vconcat([cv2.hconcat(ele) 
+                            for ele in crop_lst_2d])
+    
+    fin_img = cv2.resize(concat_img, dsize=resize)
+
+    return fin_img
