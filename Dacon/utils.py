@@ -270,9 +270,15 @@ def concat_crops(crop_lst : list, resize=(299, 299)) -> np.array :
     """Crop 된 Image들을 받아 Concat하여 하나의 image로 만들어버립니다.
     Weakly Supervised다 보니, 일단... 하나의 이미지를 가지고 학습하는 방법으로 시도해봤습니다.
     """
-    rows = len(crop_lst) // 2
 
-    crop_lst_2d = np.reshape(crop_lst, (-1, rows))
+    crop_lst = np.array(crop_lst).ravel()
+
+    len_row = math.floor(np.sqrt(len(crop_lst)))
+    len_col = math.floor(len(crop_lst) / len_row)
+
+    crop_lst = crop_lst[:len_row*len_col]
+
+    crop_lst_2d = np.resize(crop_lst, (len_row, len_col))
 
     concat_img = cv2.vconcat([cv2.hconcat(ele) 
                             for ele in crop_lst_2d])
