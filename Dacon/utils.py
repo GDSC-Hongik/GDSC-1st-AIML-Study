@@ -67,8 +67,8 @@ def find_bbox(img_path : str,
             box = np.int0(box)
             cv2.drawContours(dst, [box], -1, (0, 0, 255), 10) 
 
-    # cv2.imshow(dst) local에서 돌릴 땐 이게 될 거고
-    cv2_imshow(dst) # colav에서 돌릴 땐 이걸 쓰십쇼
+    # # cv2.imshow(dst) local에서 돌릴 땐 이게 될 거고
+    # cv2_imshow(dst) # colav에서 돌릴 땐 이걸 쓰십쇼
 
     return cropped_imgs
 
@@ -130,7 +130,10 @@ def get_tiles(img : np.array , tile_size : tuple, offset : tuple) -> list :
                                 offset[0]*j:min(offset[0]*j+tile_size[0], img_shape[1])]
             
             if cropped_img.shape[0] >= tile_size[0] and cropped_img.shape[1] >= tile_size[1] :
-                tile_lst.append(cropped_img)
+                
+                ## 공백이 너무 많은 tile은 지워집니다.
+                if 100 < cropped_img.mean() < 200 :
+                    tile_lst.append(cropped_img)
 
     return tile_lst
 
@@ -269,20 +272,28 @@ def test_aug(crop_lst : list) -> list :
 def concat_crops(crop_lst : list, resize=(299, 299)) -> np.array :
     """Crop 된 Image들을 받아 Concat하여 하나의 image로 만들어버립니다.
     Weakly Supervised다 보니, 일단... 하나의 이미지를 가지고 학습하는 방법으로 시도해봤습니다.
+
+    crop_lst shape 
+    [tile_len, W, H, C]
     """
 
-    crop_lst = np.array(crop_lst).ravel()
+    crop_lst = np.array(crop_lst)
+
+    random_choice = np.random.choice(len(crop_lst), 9, replace=False)
+    crop_lst = crop_lst[random_choice]
+    print(crop_lst.shape)
 
     len_row = math.floor(np.sqrt(len(crop_lst)))
-    len_col = math.floor(len(crop_lst) / len_row)
+    len_col = len_row
+
 
     crop_lst = crop_lst[:len_row*len_col]
 
-    crop_lst_2d = np.resize(crop_lst, (len_row, len_col))
-
+    crop_lst_2d = crop_lst.reshape(len_row, len_col, 100, 100, 3)
+    
     concat_img = cv2.vconcat([cv2.hconcat(ele) 
                             for ele in crop_lst_2d])
-    
+        
     fin_img = cv2.resize(concat_img, dsize=resize)
 
     return fin_img
