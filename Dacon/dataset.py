@@ -5,6 +5,7 @@ import numpy as np
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
+
 class GDSCDataset(Dataset) :
     '''
     Attention-Based MIL 논문의 MNIST 예제를 참고하여 만들었습니다.
@@ -80,11 +81,11 @@ class GDSCDatasetV2(Dataset) :
     def __getitem__(self, idx) :
         img_path = self.medical_df['img_path'].iloc[idx]
         label = self.labels[idx]
-        cropped_imgs = find_bbox(img_path=img_path)
+        cropped_imgs = find_bbox(img_path=img_path, bbox_h=50, bbox_w=50)
 
         tile_lst = []
         for crop in cropped_imgs :
-                    for tile in get_tiles(img=crop, tile_size=(150, 150), offset=(30, 30)) :
+                    for tile in get_tiles(img=crop, tile_size=(100, 100), offset=(15, 15)) :
                         tile_lst.append(tile)
 
         fin_img = concat_crops(tile_lst)
