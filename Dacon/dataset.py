@@ -122,6 +122,7 @@ class GDSCDatasetV3(Dataset):
                         ToTensorV2()
                         ])
 
+
     def __getitem__(self, idx):
         img_path = self.medical_df['img_path'].iloc[idx]
         label = self.labels[idx]
