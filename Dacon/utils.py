@@ -356,7 +356,7 @@ def V3_patch_filter(patch_lst: np.array, th_value=0.5):
         num_non_zero = cv2.countNonZero(img)
         white_ratio = num_non_zero / (gray_patch.shape[0]*gray_patch.shape[1])
         
-        if white_ratio < th_value:
+        if patch.mean() < 210:
             fin_lst.append(patch)
 
     return fin_lst
