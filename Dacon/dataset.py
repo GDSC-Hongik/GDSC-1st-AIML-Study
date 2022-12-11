@@ -127,7 +127,7 @@ class GDSCDatasetV3(Dataset):
         label = self.labels[idx]
 
         patch_lst = V3_patches(img_path=img_path, patch_size=(299, 299))
-        fin_patch_lst = V3_patch_filter(patch_lst=patch_lst, th_value=0.3)
+        fin_patch_lst = V3_patch_filter(patch_lst=patch_lst, th_value=0.6)
         print(f"최종 Patch 수 : {len(fin_patch_lst)}")
 
         if self.train_mode:
