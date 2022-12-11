@@ -1,9 +1,11 @@
 from torch.utils.data import Dataset, DataLoader
-from utils import find_bbox, crop_rect, show_crops, get_tiles, show_tiles, train_aug, test_aug, concat_crops
+from utils import *
 import pandas as pd
 import numpy as np
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
+
+import torch
 
 
 class GDSCDataset(Dataset) :
@@ -99,4 +101,47 @@ class GDSCDatasetV2(Dataset) :
         return fin_img, label
 
     def __len__(self) :
+        return len(self.medical_df)
+
+
+class GDSCDatasetV3(Dataset):
+    def __init__(self, medical_df : pd.DataFrame, labels : np.array, train_mode=True):
+        self.medical_df = medical_df
+        self.labels = labels
+        self.train_mode = train_mode
+        self.train_augs = A.Compose([
+                        A.HorizontalFlip(),
+                        A.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
+                        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
+                                    max_pixel_value=255.0, always_apply=False, p=1.0),
+                        ToTensorV2()
+                        ])
+        self.test_augs = A.Compose([
+                        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
+                                    max_pixel_value=255.0, always_apply=False, p=1.0),
+                        ToTensorV2()
+                        ])
+
+    def __getitem__(self, idx):
+        img_path = self.medical_df['img_path'].iloc[idx]
+        label = self.labels[idx]
+
+        patch_lst = V3_patches(img_path=img_path, patch_size=(299, 299))
+        fin_patch_lst = V3_patch_filter(patch_lst=patch_lst, th_value=0.3)
+
+        if self.train_mode:
+            aug_lst = []
+            for patch in fin_patch_lst:
+                aug_patch = self.train_augs(image=patch)['image']
+                aug_lst.append(aug_patch)
+        else:
+            aug_lst = []
+            for patch in fin_patch_lst:
+                aug_patch = self.test_augs(image=patch)['image']
+
+        fin_imgs = torch.concat(aug_lst, dim=0)
+        
+        return fin_patch_lst, label
+
+    def __len__(self):
         return len(self.medical_df)
