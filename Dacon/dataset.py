@@ -128,6 +128,7 @@ class GDSCDatasetV3(Dataset):
 
         patch_lst = V3_patches(img_path=img_path, patch_size=(299, 299))
         fin_patch_lst = V3_patch_filter(patch_lst=patch_lst, th_value=0.3)
+        print(f"최종 Patch 수 : {len(fin_patch_lst)}")
 
         if self.train_mode:
             aug_lst = []
@@ -140,8 +141,10 @@ class GDSCDatasetV3(Dataset):
                 aug_patch = self.test_augs(image=patch)['image']
 
         fin_imgs = torch.concat(aug_lst, dim=0)
+        print(f"Bag의 수 : {len(fin_imgs)}")
+        print(f"Bag의 Type : {type(fin_imgs)}")
         
-        return fin_patch_lst, label
+        return fin_imgs, label
 
     def __len__(self):
         return len(self.medical_df)
