@@ -3,7 +3,7 @@ from glob import glob
 import cv2
 import numpy as np
 import math
-from google.colab.patches import cv2_imshow
+# from google.colab.patches import cv2_imshow
 import random
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
@@ -361,3 +361,11 @@ def V3_patch_filter(patch_lst: np.array, th_value=0.5):
 
     return fin_lst
         
+def calculate_acc(y_pred, y) :
+    '''
+    정확도를 계산하기 위한 함수입니다.
+    '''
+    top_pred = y_pred.argmax(1, keepdim=True)
+    correct = top_pred.eq(y.view_as(top_pred)).sum()
+    acc = correct.float() / y.shape[0]
+    return acc
