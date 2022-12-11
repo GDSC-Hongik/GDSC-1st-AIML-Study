@@ -297,3 +297,67 @@ def concat_crops(crop_lst : list, resize=(299, 299)) -> np.array :
     fin_img = cv2.resize(concat_img, dsize=resize)
 
     return fin_img
+
+from typing import List
+
+def V3_patches(img_path: str, patch_size=(299, 299)) :
+    img = cv2.imread(img_path)
+    img_copy = img.copy()
+    img_h = img.shape[0]
+    img_w = img.shape[1]
+
+    M, N = patch_size[0], patch_size[1]
+    x1, y1 = 0, 0
+
+    patch_lst = []
+    for y in range(0, img_h, M):
+        for x in range(0, img_w, N):
+            if (img_h - y) < M or (img_w - x) < N:
+                break
+
+            y1 = y + M
+            x1 = x + N
+
+
+            if x1 >= img_w and y1 > img_h:
+                x1 = img_w - 1
+                y1 = img_h - 1
+
+                tiles = img_copy[y:y+M, x:x+N]
+                patch_lst.append(tiles)
+
+            elif y >= img_h:
+                y = img_h - 1
+
+                tiles = img_copy[y:y+M, x:x+N]
+                patch_lst.append(tiles)
+
+            elif x1 >= img_w:
+                x = img_w - 1
+
+                tiles = img_copy[y:y+M, x:x+N]
+                patch_lst.append(tiles)
+
+            else :
+                tiles = img_copy[y:y+M, x:x+N]
+                patch_lst.append(tiles)
+    
+    return patch_lst
+
+def V3_patch_filter(patch_lst: np.array, th_value=0.5):
+    fin_lst = []
+    for patch in patch_lst:
+        gray_patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
+
+        _, img = cv2.threshold(gray_patch, -1, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+
+        # 0 = 검정색 255 = 하얀색
+        # img의 하얀 부분이 얼마나 있나를 확인
+        num_non_zero = cv2.countNonZero(img)
+        white_ratio = num_non_zero / (gray_patch.shape[0]*gray_patch.shape[1])
+        
+        if white_ratio < th_value:
+            fin_lst.append(patch)
+
+    return fin_lst
+        
