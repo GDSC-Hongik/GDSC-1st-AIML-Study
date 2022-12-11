@@ -12,7 +12,7 @@ import torch.nn as nn
 
 train_df = pd.read_csv('/content/train.csv')
 
-train_loader, val_loader = return_dataloaders(df=train_df)
+train_loader, val_loader = return_dataloaders(df=train_df, ver='3')
 
 model = InceptionV3()
 
@@ -24,7 +24,7 @@ OPTIMIZER = torch.optim.Adam(model.parameters(), lr=LR)
 
 
 print('Model Architecture 🚩')
-print(summary(model, input_size=(3,299,294), device='cuda'))
+print(model)
 
 trainer = Train(model=model, 
                 num_epoch=NUM_EPOCH,
