@@ -6,13 +6,14 @@ from torchvision import models
 
 class InceptionV3(nn.Module):
     def __init__(self):
-        self.model = models.inception_v3()
-        self.model.fc = nn.Sequential(
-            nn.Linear(self.model.fc.in_features, 10),
-            nn.Linear(10, 2)
-        )
+        super(InceptionV3, self).__init__()
+        self.model = models.inception_v3(pretrained=True)
+        self.linear1 = nn.Linear(1000, 10)
+        self.linear2 = nn.Linear(10, 2)
 
     def forward(self, x):
         out = self.model(x)
-        return out
+        out = self.linear1(out)
+        out = self.linear2(out)
 
+        return out
