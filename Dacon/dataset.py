@@ -128,24 +128,25 @@ class GDSCDatasetV3(Dataset):
         label = self.labels[idx]
 
         patch_lst = V3_patches(img_path=img_path, patch_size=(299, 299))
-        fin_patch_lst = V3_patch_filter(patch_lst=patch_lst, th_value=0.6)
-        print(f"최종 Patch 수 : {len(fin_patch_lst)}")
+        patch_lst_2 = V3_patch_filter(patch_lst=patch_lst, mean_thresh=244)
+        patch_lst_3 = V3_patch_selector(patch_lst=patch_lst_2, n=42)
+        fin_img = V3_grid(patch_lst=patch_lst_3)
 
         if self.train_mode:
-            aug_lst = []
-            for patch in fin_patch_lst:
-                aug_patch = self.train_augs(image=patch)['image']
-                aug_lst.append(aug_patch)
+            # aug_lst = []
+            # for patch in fin_patch_lst:
+            aug_img = self.train_augs(image=fin_img)['image']
+                # aug_lst.append(aug_patch)
         else:
-            aug_lst = []
-            for patch in fin_patch_lst:
-                aug_patch = self.test_augs(image=patch)['image']
+            # aug_lst = []
+            # for patch in fin_patch_lst:
+            aug_img = self.test_augs(image=fin_img)['image']
 
-        fin_imgs = torch.concat(aug_lst, dim=0)
-        print(f"Bag의 수 : {len(fin_imgs)}")
-        print(f"Bag의 Type : {type(fin_imgs)}")
+        # fin_imgs = torch.concat(aug_lst, dim=0)
+        # print(f"Bag의 수 : {len(fin_imgs)}")
+        # print(f"Bag의 Type : {type(fin_imgs)}")
         
-        return fin_imgs, label
+        return torch.tensor(aug_img), torch.tensor(label)
 
     def __len__(self):
         return len(self.medical_df)
