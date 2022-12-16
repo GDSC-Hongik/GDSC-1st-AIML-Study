@@ -344,7 +344,7 @@ def V3_patches(img_path: str, patch_size=(299, 299)) :
     
     return patch_lst
 
-def V3_patch_filter(patch_lst: np.array, th_value=0.5):
+def V3_patch_filter(patch_lst: np.array, mean_thresh=240):
     fin_lst = []
     for patch in patch_lst:
         gray_patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
@@ -356,11 +356,24 @@ def V3_patch_filter(patch_lst: np.array, th_value=0.5):
         num_non_zero = cv2.countNonZero(img)
         white_ratio = num_non_zero / (gray_patch.shape[0]*gray_patch.shape[1])
         
-        if patch.mean() < 240:
+        if patch.mean() < mean_thresh:
             fin_lst.append(patch)
 
     return fin_lst
         
+def V3_patch_selector(patch_lst: np.array, n=42):
+    """mean값이 큰 42개를 return 합니다."""
+
+    return sorted(patch_lst, key=lambda patch:patch.mean())[:n]
+
+def V3_grid(patch_lst: np.array):
+    crop_lst_2d = patch_lst.reshape(6, 7, 299, 299, 3)
+    
+    concat_img = cv2.vconcat([cv2.hconcat(ele) 
+                            for ele in crop_lst_2d])
+
+    return concat_img
+
 def calculate_acc(y_pred, y) :
     '''
     정확도를 계산하기 위한 함수입니다.
