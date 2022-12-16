@@ -367,6 +367,7 @@ def V3_patch_selector(patch_lst: np.array, n=42):
     return sorted(patch_lst, key=lambda patch:patch.mean())[:n]
 
 def V3_grid(patch_lst: np.array):
+    patch_lst = np.array(patch_lst)
     crop_lst_2d = patch_lst.reshape(6, 7, 299, 299, 3)
     
     concat_img = cv2.vconcat([cv2.hconcat(ele) 
