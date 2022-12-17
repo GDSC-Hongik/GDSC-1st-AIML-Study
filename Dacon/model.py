@@ -62,19 +62,21 @@ class AttentionBasedMIL(nn.Module):
         Y_hat = torch.ge(Y_prob, 0.5).float()
         return Y_prob, Y_hat, A.byte()
 
+# FIXME : Will be Changed to InceptionV3
 class MyInceptionV3(nn.Module):
     """Concat된 애들을 AdativePooling 229x229로 만들어 준 다음에 inception v3에 넣습니다. """
+    """일단 임시로 efnb0으로 했습니다 ㅠㅠ inceptionv3 뭔가 좀 다르네요...?"""
     def __init__(self):
         super(MyInceptionV3, self).__init__()
 
         self.pooling = nn.AdaptiveAvgPool2d(299, 299)
-        self.main = models.inception_v3(pretrained=True)
+        self.main = models.efficientnet_b0(pretrained=True)
         self.linear1 = nn.Linear(1000, 10)
         self.linear2 = nn.Linear(10, 2)
 
     def forward(self, x) :
         x = self.pooling(x)
-        x = self.main(x)
+        x = self.main(x) # Inception V3's Output : x, Aux -> 나중에 x, _ 로!
         x = self.linear1(x)
         output = self.linear2(x)
         return output
