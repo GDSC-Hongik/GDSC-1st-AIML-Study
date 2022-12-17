@@ -69,7 +69,7 @@ class MyInceptionV3(nn.Module):
     def __init__(self):
         super(MyInceptionV3, self).__init__()
 
-        self.pooling = nn.AdaptiveAvgPool2d(299, 299)
+        self.pooling = nn.AdaptiveAvgPool2d((299, 299))
         self.main = models.efficientnet_b0(pretrained=True)
         self.linear1 = nn.Linear(1000, 10)
         self.linear2 = nn.Linear(10, 2)
