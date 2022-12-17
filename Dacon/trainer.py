@@ -15,7 +15,7 @@ class Train :
                 criterion,
                 tr_loader,
                 val_loader,
-                te_loader) :
+                ) :
 
         self.model = model
         self.num_epoch = num_epoch
@@ -23,7 +23,6 @@ class Train :
         self.criterion = criterion
         self.tr_loader = tr_loader
         self.val_loader = val_loader
-        # self.te_loader = te_loader
         
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -69,7 +68,7 @@ class Train :
             imgs, labels = imgs.to(self.device), labels.to(self.device)
 
             self.optimizer.zero_grad()
-            y_preds, _ = self.model(imgs)
+            y_preds = self.model(imgs)
 
             loss = self.criterion(y_preds, labels)
             acc = calculate_acc(y_preds, labels)
@@ -83,24 +82,18 @@ class Train :
         return epoch_loss/len(self.tr_loader), epoch_acc/len(self.tr_loader)
 
 
-    def eval(self, phase=None) : 
+    def eval(self, phase="valid") : 
         epoch_loss, epoch_acc = 0, 0
-        self.model.train_mode = False
+        self.model.eval()
 
-        
         with torch.no_grad() :
-            loader = self.val_loader
-
-            # if phase == 'test' :
-            #     loader = self.te_loader
-            #     self.model.load_state_dict(torch.load('./BEST_MODEL.pt'))
 
             self.model.eval()
             self.model.to(self.device)
 
-            for imgs, labels in loader :
+            for imgs, labels in self.val_loader :
                 imgs, labels = imgs.to(self.device), labels.to(self.device)
-                y_preds, _ = self.model(imgs)
+                y_preds = self.model(imgs)
                 
                 loss = self.criterion(y_preds, labels)
                 acc = calculate_acc(y_preds, labels)
@@ -109,5 +102,5 @@ class Train :
                 epoch_acc += acc.item()
 
 
-        return epoch_loss/len(loader), epoch_acc/len(loader)
+        return epoch_loss/len(self.val_loader), epoch_acc/len(self.val_loader)
 
