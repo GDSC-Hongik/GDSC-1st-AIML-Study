@@ -146,7 +146,7 @@ class GDSCDatasetV3(Dataset):
         # print(f"Bag의 수 : {len(fin_imgs)}")
         # print(f"Bag의 Type : {type(fin_imgs)}")
         
-        return torch.tensor(aug_img), torch.tensor(label)
+        return aug_img, label
 
     def __len__(self):
         return len(self.medical_df)
