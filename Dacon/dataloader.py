@@ -33,10 +33,10 @@ def return_dataloaders(df : pd.DataFrame, ver='2') -> torch.utils.data.DataLoade
 
     elif ver =='3' :
         train_dataset = GDSCDatasetV3(medical_df=train_df, labels=train_labels.values, train_mode=True)
-        train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
+        train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
         val_dataset = GDSCDatasetV3(medical_df=val_df, labels=val_labels.values, train_mode=False)
-        val_loader = DataLoader(val_dataset, batch_size=1)
+        val_loader = DataLoader(val_dataset, batch_size=32)
 
     print(f'✅ # of Train Datas : {len(train_dataset)}')
     print(f'✅ # of Validation Datas : {len(val_dataset)}')
