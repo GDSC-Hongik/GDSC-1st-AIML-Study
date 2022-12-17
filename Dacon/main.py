@@ -1,6 +1,6 @@
 from dataset import GDSCDataset
 from dataloader import return_dataloaders
-from model import InceptionV3
+from model import InceptionV3, MyInceptionV3
 from trainer import Train
 
 from torchsummary import summary
@@ -14,7 +14,7 @@ train_df = pd.read_csv('/content/train.csv')
 
 train_loader, val_loader = return_dataloaders(df=train_df, ver='3')
 
-model = InceptionV3()
+model = MyInceptionV3()
 
 # train configs
 NUM_EPOCH = 10
