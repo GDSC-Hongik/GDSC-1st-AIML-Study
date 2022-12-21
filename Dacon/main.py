@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 
 
-train_df = pd.read_csv('/content/train.csv')
+train_df = pd.read_csv('/content/GDSC-1st-AIML-Study/Dacon/train.csv')
 
 train_loader, val_loader = return_dataloaders(df=train_df, ver='3')
 
