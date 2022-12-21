@@ -64,11 +64,11 @@ class Train :
         self.model.train_mode = True
         self.model.to(self.device)
 
-        for imgs, labels in tqdm(self.tr_loader) :
-            imgs, labels = imgs.to(self.device), labels.to(self.device)
+        for imgs, tabular , labels in tqdm(self.tr_loader) :
+            imgs, tabular, labels = imgs.to(self.device), tabular.to(self.device), labels.to(self.device)
 
             self.optimizer.zero_grad()
-            y_preds = self.model(imgs)
+            y_preds = self.model(imgs, tabular)
 
             loss = self.criterion(y_preds, labels)
             acc = calculate_acc(y_preds, labels)
@@ -88,12 +88,11 @@ class Train :
 
         with torch.no_grad() :
 
-            self.model.eval()
             self.model.to(self.device)
 
-            for imgs, labels in self.val_loader :
-                imgs, labels = imgs.to(self.device), labels.to(self.device)
-                y_preds = self.model(imgs)
+            for imgs, tabular, labels in self.val_loader :
+                imgs, tabular, labels = imgs.to(self.device), tabular.to(self.device), labels.to(self.device)
+                y_preds = self.model(imgs, tabular)
                 
                 loss = self.criterion(y_preds, labels)
                 acc = calculate_acc(y_preds, labels)
