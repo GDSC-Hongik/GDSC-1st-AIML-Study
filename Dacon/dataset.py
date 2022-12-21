@@ -5,6 +5,8 @@ import numpy as np
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
+from prep import Prep
+
 import torch
 
 
@@ -126,6 +128,8 @@ class GDSCDatasetV3(Dataset):
     def __getitem__(self, idx):
         img_path = self.medical_df['img_path'].iloc[idx]
         label = self.labels[idx]
+        tabular = Prep(self.medical_df)
+        scaled_df = tabular.run()
 
         patch_lst = V3_patches(img_path=img_path, patch_size=(299, 299))
         patch_lst_2 = V3_patch_filter(patch_lst=patch_lst, mean_thresh=244)
@@ -133,20 +137,16 @@ class GDSCDatasetV3(Dataset):
         fin_img = V3_grid(patch_lst=patch_lst_3)
 
         if self.train_mode:
-            # aug_lst = []
-            # for patch in fin_patch_lst:
             aug_img = self.train_augs(image=fin_img)['image']
-                # aug_lst.append(aug_patch)
         else:
-            # aug_lst = []
-            # for patch in fin_patch_lst:
+
             aug_img = self.test_augs(image=fin_img)['image']
 
-        # fin_imgs = torch.concat(aug_lst, dim=0)
-        # print(f"Bag의 수 : {len(fin_imgs)}")
-        # print(f"Bag의 Type : {type(fin_imgs)}")
+
         
-        return aug_img, label
+        return aug_img, scaled_df, label
 
     def __len__(self):
         return len(self.medical_df)
+
+
