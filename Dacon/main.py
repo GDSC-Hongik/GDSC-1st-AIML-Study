@@ -1,6 +1,6 @@
 from dataset import GDSCDataset
 from dataloader import return_dataloaders
-from model import InceptionV3, MyInceptionV3
+from model import InceptionV3, MyInceptionV3, ModalClassifier
 from trainer import Train
 
 from torchsummary import summary
@@ -14,7 +14,7 @@ train_df = pd.read_csv('/content/GDSC-1st-AIML-Study/Dacon/train.csv')
 
 train_loader, val_loader = return_dataloaders(df=train_df, ver='3')
 
-model = MyInceptionV3()
+model = ModalClassifier()
 
 # train configs
 NUM_EPOCH = 10
