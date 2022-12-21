@@ -71,12 +71,53 @@ class MyInceptionV3(nn.Module):
 
         self.pooling = nn.AdaptiveAvgPool2d((299, 299))
         self.main = models.efficientnet_b0(pretrained=True)
-        self.linear1 = nn.Linear(1000, 10)
-        self.linear2 = nn.Linear(10, 2)
+        self.linear1 = nn.Linear(1000, 512)
+        self.linear2 = nn.Linear(512, 256)
 
     def forward(self, x) :
         x = self.pooling(x)
         x = self.main(x) # Inception V3's Output : x, Aux -> 나중에 x, _ 로!
         x = self.linear1(x)
         output = self.linear2(x)
+        return output
+
+class TabularExtractor(nn.Module):
+    def __init__(self):
+        super(TabularExtractor, self).__init__()
+
+        self.embedding = nn.Sequential(
+            nn.Linear(in_features=23, out_features=128),
+            nn.BatchNorm1d(128),
+            nn.LeakyReLU(),
+            nn.Linear(in_features=128, out_features=256),
+            nn.BatchNorm1d(256),
+            nn.LeakyReLU(),
+            nn.Linear(in_features=256, out_features=512),
+            nn.BatchNorm1d(512),
+            nn.LeakyReLU(),
+            nn.Linear(in_features=512, out_features=256)
+        )
+        
+    def forward(self, x):
+        output = self.embedding(x)
+        return output
+
+class ModalClassifier(nn.Module):
+    def __init__(self):
+        super(ModalClassifier, self).__init__()
+
+        self.img_team = MyInceptionV3()
+        self.tab_team = TabularExtractor()
+        self.finalize = nn.Sequential(
+            nn.Linear(512, 256),
+            nn.Dropout(0.2),
+            nn.LeakyReLU(),
+            nn.Linear(256,2)
+        )
+
+    def forward(self, img, tabular):
+        img_feature = self.img_team(img)
+        tab_feature = self.tab_team(tabular)
+        flatten_feature = torch.cat([img_feature, tab_feature], dim=-1)
+        output = self.finalize(flatten_feature)
         return output
