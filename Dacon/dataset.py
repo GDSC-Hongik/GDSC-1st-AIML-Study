@@ -128,8 +128,7 @@ class GDSCDatasetV3(Dataset):
     def __getitem__(self, idx):
         img_path = self.medical_df['img_path'].iloc[idx]
         label = self.labels[idx]
-        tabular = Prep(self.medical_df)
-        scaled_df = tabular.run()
+        tabular = torch.Tensor(self.medical_df.drop(columns=['ID', 'img_path', 'mask_path', '수술연월일']).iloc[idx])
 
         patch_lst = V3_patches(img_path=img_path, patch_size=(299, 299))
         patch_lst_2 = V3_patch_filter(patch_lst=patch_lst, mean_thresh=244)
@@ -144,7 +143,7 @@ class GDSCDatasetV3(Dataset):
 
 
         
-        return aug_img, scaled_df, label
+        return aug_img, tabular, label
 
     def __len__(self):
         return len(self.medical_df)
