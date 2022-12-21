@@ -8,7 +8,10 @@ import torch
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
+from prep import Prep
+
 def return_dataloaders(df : pd.DataFrame, ver='2') -> torch.utils.data.DataLoader :
+
 
     train_df, val_df, train_labels, val_labels = train_test_split(
                                                         df.drop(columns=['N_category']), 
@@ -17,25 +20,29 @@ def return_dataloaders(df : pd.DataFrame, ver='2') -> torch.utils.data.DataLoade
                                                         random_state=42
                                                     )
 
+    ## Scaling
+    preper = Prep(train_df=train_df, val_df=val_df)
+    scaled_tr, scaled_val = preper.run()
+
     if ver == '1' :
-        train_dataset = GDSCDataset(medical_df=train_df, labels=train_labels.values, train_mode=True)
+        train_dataset = GDSCDataset(medical_df=scaled_tr, labels=train_labels.values, train_mode=True)
         train_loader = DataLoader(train_dataset, batch_size=1)
 
-        val_dataset = GDSCDataset(medical_df=val_df, labels=val_labels.values, train_mode=False)
+        val_dataset = GDSCDataset(medical_df=scaled_val, labels=val_labels.values, train_mode=False)
         val_loader = DataLoader(val_dataset, batch_size=1)
 
     elif ver == '2' :
-        train_dataset = GDSCDatasetV2(medical_df=train_df, labels=train_labels.values, train_mode=True)
+        train_dataset = GDSCDatasetV2(medical_df=scaled_tr, labels=train_labels.values, train_mode=True)
         train_loader = DataLoader(train_dataset, batch_size=16)
 
-        val_dataset = GDSCDatasetV2(medical_df=val_df, labels=val_labels.values, train_mode=False)
+        val_dataset = GDSCDatasetV2(medical_df=scaled_val, labels=val_labels.values, train_mode=False)
         val_loader = DataLoader(val_dataset, batch_size=16)
 
     elif ver =='3' :
-        train_dataset = GDSCDatasetV3(medical_df=train_df, labels=train_labels.values, train_mode=True)
+        train_dataset = GDSCDatasetV3(medical_df=scaled_tr, labels=train_labels.values, train_mode=True)
         train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
-        val_dataset = GDSCDatasetV3(medical_df=val_df, labels=val_labels.values, train_mode=False)
+        val_dataset = GDSCDatasetV3(medical_df=scaled_val, labels=val_labels.values, train_mode=False)
         val_loader = DataLoader(val_dataset, batch_size=32)
 
     print(f'✅ # of Train Datas : {len(train_dataset)}')
