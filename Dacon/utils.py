@@ -383,3 +383,6 @@ def calculate_acc(y_pred, y) :
     correct = top_pred.eq(y.view_as(top_pred)).sum()
     acc = correct.float() / y.shape[0]
     return acc
+
+def get_values(value):
+    return value.values.reshape(-1,1)
