@@ -19,7 +19,7 @@ model = ModalClassifier()
 # train configs
 NUM_EPOCH = 10
 CRITERION = nn.CrossEntropyLoss()
-LR = 1e-7
+LR = 1e-3
 OPTIMIZER = torch.optim.Adam(model.parameters(), lr=LR)
 
 
