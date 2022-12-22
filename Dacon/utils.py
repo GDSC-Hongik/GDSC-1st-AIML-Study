@@ -364,7 +364,7 @@ def V3_patch_filter(patch_lst: np.array, mean_thresh=240):
 def V3_patch_selector(patch_lst: np.array, n=42):
     """mean값이 큰 42개를 return 합니다."""
 
-    return sorted(patch_lst, key=lambda patch:patch.mean(), reverse=True)[:n]
+    return sorted(patch_lst, key=lambda patch:patch.mean())[:n]
 
 def V3_grid(patch_lst: np.array):
     patch_lst = np.array(patch_lst)
