@@ -12,6 +12,7 @@ class Train :
                 model,
                 num_epoch,
                 optimizer,
+                scheduler,
                 criterion,
                 tr_loader,
                 val_loader,
@@ -20,6 +21,7 @@ class Train :
         self.model = model
         self.num_epoch = num_epoch
         self.optimizer = optimizer
+        self.scheduler = scheduler
         self.criterion = criterion
         self.tr_loader = tr_loader
         self.val_loader = val_loader
@@ -32,6 +34,9 @@ class Train :
         print(f'Using Resource is... : {self.device}')
         best_acc = 0.0
 
+        early_count = 0
+        best_val_loss = None
+
         for epoch in range(1, self.num_epoch + 1) :
             start = time.time()
             
@@ -39,18 +44,35 @@ class Train :
             val_loss, val_acc = self.eval(phase='valid')
                         
             it_takes = time.time() - start
-            
-            print(f'EPOCH {epoch}')
+
+
+            if best_val_loss > val_loss:
+                best_val_loss = val_loss
+
+            elif best_val_loss < val_loss:
+                early_count += 1
+                
+
+            print(f'EPOCH {epoch}/{self.num_epoch}\tEARLY STACK {early_count}/5')
             print(f'TRAIN LOSS : {train_loss:.3f}\tTRAIN ACC : {train_acc*100:.2f}%')
             print(f'VALIDATION LOSS : {val_loss:.3f}\tVALIDATION ACC : {val_acc*100:.2f}%')
             print(f'It takes... {it_takes/60:.2f}m')
-            print('=='*40)
             
 
             if val_acc > best_acc :
                 best_acc = val_acc 
                 print(f'\n✅ BEST MODEL IS SAVED at {epoch} epoch')
                 torch.save(self.model.state_dict(), './BEST_MODEL.pt')
+
+            print("LR Scheduler is Working..")
+            self.scheduler.step(val_loss)
+
+            if early_count == 5:
+                print("Early Stopping!")
+                break
+
+
+            print('=='*40)
 
         # print('\n\n')
         # print('✨ Start Evaluation... ✨')
