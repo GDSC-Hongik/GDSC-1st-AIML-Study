@@ -12,8 +12,9 @@ import torch.nn as nn
 from inference import *
 
 train_df = pd.read_csv('/content/GDSC-1st-AIML-Study/Dacon/train.csv')
+test_df = pd.read_csv('/content/GDSC-1st-AIML-Study/Dacon/test.csv')
 
-train_loader, val_loader, test_loader = return_dataloaders(df=train_df, ver='3')
+train_loader, val_loader, test_loader = return_dataloaders(df=train_df, test_df=test_df, ver='3')
 
 model = ModalClassifier()
 
