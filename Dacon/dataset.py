@@ -127,8 +127,6 @@ class GDSCDatasetV3(Dataset):
 
     def __getitem__(self, idx):
         img_path = self.medical_df['img_path'].iloc[idx]
-        label = self.labels[idx]
-        tabular = torch.Tensor(self.medical_df.drop(columns=['ID', 'img_path', 'mask_path', '수술연월일']).iloc[idx])
 
         patch_lst = V3_patches(img_path=img_path, patch_size=(299, 299))
         patch_lst_2 = V3_patch_filter(patch_lst=patch_lst, mean_thresh=244)
@@ -141,9 +139,16 @@ class GDSCDatasetV3(Dataset):
 
             aug_img = self.test_augs(image=fin_img)['image']
 
+        if self.labels is not None: # train 혹은 val일 때
+            label = self.labels[idx]
+            tabular = torch.Tensor(self.medical_df.drop(columns=['ID', 'img_path', 'mask_path', '수술연월일']).iloc[idx])
+    
+            return aug_img, tabular, label
 
-        
-        return aug_img, tabular, label
+        else: # test 일 때
+            tabular = torch.Tensor(self.medical_df.drop(columns=['ID', 'img_path', '수술연월일']).iloc[idx])
+
+            return aug_img, tabular
 
     def __len__(self):
         return len(self.medical_df)
