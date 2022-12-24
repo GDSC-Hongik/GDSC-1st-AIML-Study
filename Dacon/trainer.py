@@ -35,7 +35,7 @@ class Train :
         best_acc = 0.0
 
         early_count = 0
-        best_val_loss = None
+        best_val_loss = 1000
 
         for epoch in range(1, self.num_epoch + 1) :
             start = time.time()
