@@ -14,7 +14,7 @@ from inference import *
 train_df = pd.read_csv('/content/GDSC-1st-AIML-Study/Dacon/train.csv')
 test_df = pd.read_csv('/content/GDSC-1st-AIML-Study/Dacon/test.csv')
 
-train_loader, val_loader, test_loader = return_dataloaders(df=train_df, test_df=test_df, ver='3')
+train_loader, val_loader, test_loader = return_dataloaders(tr_ori_df=train_df, test_df=test_df, ver='3')
 
 model = ModalClassifier()
 
@@ -23,7 +23,7 @@ NUM_EPOCH = 10
 CRITERION = nn.CrossEntropyLoss()
 LR = 1e-2
 OPTIMIZER = torch.optim.Adam(model.parameters(), lr=LR)
-SCHEDULRER = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(OPTIMIZER)
+SCHEDULRER = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(OPTIMIZER, T_0=2)
 
 
 print('Model Architecture 🚩')
@@ -42,7 +42,7 @@ trainer.training()
 
 print("✔Training is Done!!✔")
 print("✨Start Evaluation✨")
-infer_model = './BEST_MODEL.pt'
+infer_model = model.load_state_dict(torch.load('./BEST_MODEL.pt'))
 preds = inference(model=infer_model, test_loader=test_loader, device=trainer.device)
 make_submission(preds=preds, path='./SUBMISSION')
 print("Done!")
